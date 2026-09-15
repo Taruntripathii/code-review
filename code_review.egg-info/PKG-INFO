@@ -1,0 +1,15 @@
+Metadata-Version: 2.4
+Name: code-review
+Version: 0.1.0
+Summary: A code review project
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: alembic>=1.20.0
+Requires-Dist: fastapi>=0.141.1
+Requires-Dist: mypy>=2.3.1
+Requires-Dist: psycopg[binary]>=3.3.5
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: sqlalchemy>=2.0.52
+Requires-Dist: uvicorn>=0.52.4
+
+# code-review
