@@ -9,7 +9,10 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/code_review
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/code_review
+    volumes:
+      - ./backend:/app/backend
+    command: ["uv", "run", "uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     depends_on:
       db:
         condition: service_healthy
