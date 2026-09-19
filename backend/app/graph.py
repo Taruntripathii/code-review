@@ -16,9 +16,7 @@ def parse_diff(state: ReviewState) -> ReviewState:
 
 def filter_files(state: ReviewState) -> ReviewState:
     IGNORE_SUFFIXES = (".lock", ".min.js", ".png", ".jpg")
-    state.raw_files = [
-        f for f in state.raw_files if not f["filename"].endswith(IGNORE_SUFFIXES)
-    ]
+    state.raw_files = [f for f in state.raw_files if not f["filename"].endswith(IGNORE_SUFFIXES)]
     return state
 
 

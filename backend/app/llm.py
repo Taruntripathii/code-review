@@ -45,9 +45,7 @@ class OpenAICompatibleLLM(ReviewLLM):
         headers = {"Content-Type": "application/json"}
         if api_key:
             headers["Authorization"] = f"Bearer {api_key}"
-        self._client = httpx.Client(
-            timeout=60.0, follow_redirects=True, headers=headers
-        )
+        self._client = httpx.Client(timeout=60.0, follow_redirects=True, headers=headers)
 
     def analyze(self, prompt: str) -> str:
         resp = self._client.post(
@@ -93,9 +91,7 @@ Added lines:
 
 
 def build_prompt(file_path: str, added_lines: list[dict]) -> str:
-    lines_text = "\n".join(
-        f"  new_line={line_data['new_line']}: {line_data['content']}" for line_data in added_lines
-    )
+    lines_text = "\n".join(f"  new_line={line_data['new_line']}: {line_data['content']}" for line_data in added_lines)
     return PROMPT_TEMPLATE.format(file_path=file_path, added_lines=lines_text)
 
 

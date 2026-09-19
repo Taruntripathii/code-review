@@ -44,13 +44,9 @@ async def github_webhook(request: Request, db: Session = Depends(get_db)):
             )
         )
         db.commit()
-    except (
-        IntegrityError
-    ):  # if unique constraint is violated then db will be not altered
+    except IntegrityError:  # if unique constraint is violated then db will be not altered
         db.rollback()
-        return {
-            "status": "duplicate"
-        }  # already-seen delivery_id — unique constraint caught it
+        return {"status": "duplicate"}  # already-seen delivery_id — unique constraint caught it
 
     event = request.headers.get("X-GitHub-Event")
     if event not in ACCEPTED_EVENTS:

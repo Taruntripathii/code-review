@@ -4,9 +4,7 @@ HUNK_HEADER_RE = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
 
 
 class ParsedLine:
-    def __init__(
-        self, new_line: int | None, old_line: int | None, content: str, kind: str
-    ):
+    def __init__(self, new_line: int | None, old_line: int | None, content: str, kind: str):
         self.new_line = new_line  # None for pure deletions
         self.old_line = old_line  # None for pure additions
         self.content = content
@@ -28,18 +26,10 @@ def parse_patch(patch: str) -> list[ParsedLine]:
             continue  # marker line, not real content — don't advance counters
 
         if raw.startswith("+"):
-            result.append(
-                ParsedLine(
-                    new_line=new_line, old_line=None, content=raw[1:], kind="added"
-                )
-            )
+            result.append(ParsedLine(new_line=new_line, old_line=None, content=raw[1:], kind="added"))
             new_line += 1
         elif raw.startswith("-"):
-            result.append(
-                ParsedLine(
-                    new_line=None, old_line=old_line, content=raw[1:], kind="removed"
-                )
-            )
+            result.append(ParsedLine(new_line=None, old_line=old_line, content=raw[1:], kind="removed"))
             old_line += 1
         else:
             result.append(

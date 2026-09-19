@@ -25,9 +25,7 @@ class Repository(Base):
     __tablename__ = "repositories"
     id = Column(Integer, primary_key=True)
     full_name = Column(String, unique=True, nullable=False)  # "owner/repo"
-    installed_at = Column(
-        DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc)
-    )
+    installed_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
 
 class PullRequest(Base):
@@ -37,9 +35,7 @@ class PullRequest(Base):
     number = Column(Integer, nullable=False)
     head_sha = Column(String, nullable=False)
     author = Column(String)
-    created_at = Column(
-        DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc)
-    )
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     repository = relationship("Repository")
 
@@ -51,9 +47,7 @@ class Review(Base):
     status = Column(String, nullable=False, default="PENDING_HUMAN_REVIEW")
     summary = Column(Text)
     already_posted = Column(Boolean, default=False)
-    created_at = Column(
-        DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc)
-    )
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     pull_request = relationship("PullRequest")
 
@@ -80,9 +74,7 @@ class ReviewDecision(Base):
     finding_id = Column(Integer, ForeignKey("findings.id"), nullable=False)
     decision = Column(String, nullable=False)  # approved | edited | rejected
     edited_explanation = Column(Text)
-    decided_at = Column(
-        DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc)
-    )
+    decided_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     finding = relationship("Finding")
 
@@ -94,9 +86,7 @@ class ModelVersion(Base):
     metrics = Column(JSON)
     feature_schema = Column(JSON)
     threshold = Column(Float, default=0.5)
-    trained_at = Column(
-        DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc)
-    )
+    trained_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
 
 class LLMRun(Base):
@@ -106,9 +96,7 @@ class LLMRun(Base):
     prompt = Column(Text)
     raw_response = Column(Text)
     latency_ms = Column(Integer)
-    created_at = Column(
-        DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc)
-    )
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
 
 class WebhookDelivery(Base):
@@ -116,6 +104,4 @@ class WebhookDelivery(Base):
     id = Column(Integer, primary_key=True)
     delivery_id = Column(String, unique=True, nullable=False)  # X-GitHub-Delivery
     event_type = Column(String)
-    received_at = Column(
-        DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc)
-    )
+    received_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))

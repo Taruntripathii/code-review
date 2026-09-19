@@ -14,10 +14,7 @@ WEBHOOK_SECRET = os.environ["GITHUB_WEBHOOK_SECRET"]
 def verify_signature(payload_body: bytes, signature_header: str | None) -> bool:
     if not signature_header or not signature_header.startswith("sha256="):
         return False
-    expected = (
-        "sha256="
-        + hmac.new(WEBHOOK_SECRET.encode(), payload_body, hashlib.sha256).hexdigest()
-    )
+    expected = "sha256=" + hmac.new(WEBHOOK_SECRET.encode(), payload_body, hashlib.sha256).hexdigest()
     return hmac.compare_digest(expected, signature_header)
 
 
