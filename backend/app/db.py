@@ -6,7 +6,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 load_dotenv(override=True)
 
-DATABASE_URL = os.environ["DATABASE_URL"]
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///:memory:")
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
