@@ -61,8 +61,8 @@ class OpenAICompatibleLLM(ReviewLLM):
 
 
 def build_default_llm() -> ReviewLLM:
-    base_url = os.environ["LLM_BASE_URL"]
-    model = os.environ["LLM_MODEL"]
+    base_url = os.getenv("LLM_BASE_URL", "http://localhost:11434")
+    model = os.getenv("LLM_MODEL", "llama3")
     if "localhost" in base_url or "127.0.0.1" in base_url:
         return OllamaLLM(base_url=base_url, model=model)
     return OpenAICompatibleLLM(

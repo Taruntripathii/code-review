@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-WEBHOOK_SECRET = os.environ["GITHUB_WEBHOOK_SECRET"]
+WEBHOOK_SECRET = os.getenv("GITHUB_WEBHOOK_SECRET", "test_secret")
 
 
 def verify_signature(payload_body: bytes, signature_header: str | None) -> bool:
