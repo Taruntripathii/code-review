@@ -14,8 +14,7 @@ class PullRequestRepo:
             .first()
         )
         if pr:
-            # pyrefly: ignore [bad-assignment]
-            pr.head_sha = head_sha  # keep it current on new pushes
+            pr.head_sha = head_sha  # type: ignore[assignment]  # keep it current on new pushes
         else:
             pr = PullRequest(repository_id=repository_id, number=number, head_sha=head_sha, author=author)
             self.db.add(pr)

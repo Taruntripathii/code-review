@@ -15,8 +15,8 @@ class GitHubClient:
     def get_pr_files(self, owner: str, repo: str, pr_number: int) -> list[dict]:
         """Handles pagination via the Link header — GitHub caps each page at 100 files."""
         files: list[dict] = []
-        url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}/files"
-        params = {"per_page": 100}
+        url: str | None = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}/files"
+        params: dict[str, int] | None = {"per_page": 100}
         while url:
             resp = self._client.get(url, params=params)
             resp.raise_for_status()
