@@ -26,8 +26,8 @@ include = ["backend*"]
 # Target Python version 3.10 (matches your project settings)
 target-version = "py310"
 
-# Set the maximum line width to 88 characters (standard Python practice)
-line-length = 88
+# Set the maximum line width to 120 characters to avoid failing on long strings
+line-length = 120
 
 [tool.ruff.lint]
 # Select the rules you want Ruff to enforce

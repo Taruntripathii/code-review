@@ -1,13 +1,15 @@
 from sqlalchemy.orm import Session
-from backend.app.models import PullRequest, Review
 
+from backend.app.models import PullRequest, Review
 
 
 class PullRequestRepo:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_or_create(self, repository_id: int, number: int, head_sha: str, author: str) -> PullRequest:
+    def get_or_create(
+        self, repository_id: int, number: int, head_sha: str, author: str
+    ) -> PullRequest:
         pr = (
             self.db.query(PullRequest)
             .filter_by(repository_id=repository_id, number=number)
@@ -16,7 +18,12 @@ class PullRequestRepo:
         if pr:
             pr.head_sha = head_sha  # type: ignore[assignment]  # keep it current on new pushes
         else:
-            pr = PullRequest(repository_id=repository_id, number=number, head_sha=head_sha, author=author)
+            pr = PullRequest(
+                repository_id=repository_id,
+                number=number,
+                head_sha=head_sha,
+                author=author,
+            )
             self.db.add(pr)
         self.db.flush()
         self.db.refresh(pr)

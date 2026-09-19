@@ -1,8 +1,9 @@
 from unittest.mock import patch
+
 from backend.app.graph import compiled_graph
 from backend.app.schemas import ReviewState
 
-FAKE_LLM_RESPONSE = '[{"file_path": "app.py", "line": 1, "category": "style", "explanation": "stub finding for graph wiring test", "confidence": 0.5}]'
+FAKE_LLM_RESPONSE = '[{"file_path": "app.py", "line": 1, "category": "style", "explanation": "stub finding for graph wiring test", "confidence": 0.5}]'  # noqa: E501
 
 
 @patch("backend.app.graph._llm")

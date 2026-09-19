@@ -1,19 +1,22 @@
-import os
 import json
+import os
 from abc import ABC, abstractmethod
+
 import httpx
-from pydantic import ValidationError
 from dotenv import load_dotenv
+from pydantic import ValidationError
+
 from backend.app.schemas import LLMFinding
 
 load_dotenv()
+
+
 class ReviewLLM(ABC):
     @abstractmethod
     def analyze(self, prompt: str) -> str: ...
 
 
 class OllamaLLM(ReviewLLM):
-    
     def __init__(self, base_url: str, model: str):
         self.base_url = base_url.rstrip("/")
         self.model = model
@@ -22,7 +25,12 @@ class OllamaLLM(ReviewLLM):
     def analyze(self, prompt: str) -> str:
         resp = self._client.post(
             f"{self.base_url}/api/generate",
-            json={"model": self.model, "prompt": prompt, "stream": False, "format": "json"},
+            json={
+                "model": self.model,
+                "prompt": prompt,
+                "stream": False,
+                "format": "json",
+            },
         )
         resp.raise_for_status()
         return resp.json()["response"]
@@ -37,7 +45,9 @@ class OpenAICompatibleLLM(ReviewLLM):
         headers = {"Content-Type": "application/json"}
         if api_key:
             headers["Authorization"] = f"Bearer {api_key}"
-        self._client = httpx.Client(timeout=60.0, follow_redirects=True, headers=headers)
+        self._client = httpx.Client(
+            timeout=60.0, follow_redirects=True, headers=headers
+        )
 
     def analyze(self, prompt: str) -> str:
         resp = self._client.post(
@@ -63,6 +73,7 @@ def build_default_llm() -> ReviewLLM:
         api_key=os.environ.get("LLM_API_KEY", ""),
     )
 
+
 PROMPT_TEMPLATE = """You are a senior code reviewer. You will see ONLY the added lines of a diff chunk.
 
 Rules:
@@ -82,14 +93,18 @@ Added lines:
 
 
 def build_prompt(file_path: str, added_lines: list[dict]) -> str:
-    lines_text = "\n".join(f"  new_line={l['new_line']}: {l['content']}" for l in added_lines)
+    lines_text = "\n".join(
+        f"  new_line={line_data['new_line']}: {line_data['content']}" for line_data in added_lines
+    )
     return PROMPT_TEMPLATE.format(file_path=file_path, added_lines=lines_text)
+
 
 def parse_llm_output(raw: str, file_path: str) -> list[LLMFinding]:
     raw = raw.strip()
     if "\\n" in raw:
         raw = raw.replace("\\n", "\n").replace('\\"', '"')
     import re
+
     fence_match = re.search(r"```(?:json)?\s*\n?(.*?)```", raw, re.DOTALL)
     if fence_match:
         raw = fence_match.group(1).strip()
@@ -104,5 +119,5 @@ def parse_llm_output(raw: str, file_path: str) -> list[LLMFinding]:
         try:
             findings.append(LLMFinding(**item))
         except ValidationError:
-            continue 
+            continue
     return findings

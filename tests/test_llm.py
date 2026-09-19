@@ -1,5 +1,6 @@
 from unittest.mock import patch
-from backend.app.llm import parse_llm_output, OllamaLLM
+
+from backend.app.llm import OllamaLLM, parse_llm_output
 
 
 def test_parse_valid_json():
@@ -10,7 +11,7 @@ def test_parse_valid_json():
 
 
 def test_parse_handles_markdown_fence():
-    raw = '```json\n[{"file_path": "a.py", "line": 5, "category": "bug", "explanation": "issue here", "confidence": 0.6}]\n```'
+    raw = '```json\n[{"file_path": "a.py", "line": 5, "category": "bug", "explanation": "issue here", "confidence": 0.6}]\n```'  # noqa: E501
     findings = parse_llm_output(raw, "a.py")
     assert len(findings) == 1
 
