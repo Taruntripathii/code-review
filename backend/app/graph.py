@@ -68,7 +68,7 @@ def generate_summary(state: ReviewState) -> ReviewState:
         state.summary = "No actionable findings."
         return state
 
-    counts = {}
+    counts: dict[str, int] = {}
     for f in state.deduped_findings:
         counts[f.category] = counts.get(f.category, 0) + 1
 
