@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-load_dotenv(override=True)
+load_dotenv()  # real env vars (CI, compose, tests) win over .env
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///:memory:")
 

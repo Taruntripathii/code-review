@@ -3,12 +3,15 @@ import httpx
 
 class GitHubClient:
     def __init__(self, token: str):
+        headers = {
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        }
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+
         self._client = httpx.Client(
-            headers={
-                "Authorization": f"Bearer {token}",
-                "Accept": "application/vnd.github+json",
-                "X-GitHub-Api-Version": "2022-11-28",
-            },
+            headers=headers,
             timeout=15.0,
         )
 
@@ -27,5 +30,16 @@ class GitHubClient:
 
     def get_pr(self, owner: str, repo: str, pr_number: int) -> dict:
         resp = self._client.get(f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}")
+        resp.raise_for_status()
+        return resp.json()
+
+    def create_review(self, owner: str, repo: str, pr_number: int, comments: list[dict]):
+        # Comments shape: [{"path": "file.py", "line": 42, "body": "comment text"}]
+        url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}/reviews"
+        payload = {
+            "event": "COMMENT",  # or REQUEST_CHANGES
+            "comments": comments,
+        }
+        resp = self._client.post(url, json=payload)
         resp.raise_for_status()
         return resp.json()

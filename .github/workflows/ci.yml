@@ -32,6 +32,8 @@ jobs:
         run: uv run mypy backend
 
       - name: Tests
+        env:
+          GITHUB_WEBHOOK_SECRET: devsecret123
         run: uv run pytest
 
   db-migration:
@@ -55,7 +57,16 @@ jobs:
         with: { enable-cache: true }
       - run: uv python install 3.12
       - run: uv sync --frozen
+      - name: Lint & Type Check
+        run: |
+          uv run ruff check .
+          uv run mypy backend
       - name: Run migrations
         env:
           DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/code_review
         run: uv run alembic upgrade head
+      - name: Run Tests
+        env:
+          DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/code_review
+          GITHUB_WEBHOOK_SECRET: devsecret123
+        run: uv run pytest

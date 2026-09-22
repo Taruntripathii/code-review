@@ -1,9 +1,12 @@
+import os
+
 from fastapi import Depends, FastAPI, HTTPException, Request
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from backend.app.db import get_db
-from backend.app.models import WebhookDelivery
+from backend.app.github_client import GitHubClient
+from backend.app.models import Finding, Review, WebhookDelivery
 from backend.app.webhooks import verify_signature
 
 ACCEPTED_EVENTS = {"pull_request"}
@@ -57,3 +60,40 @@ async def github_webhook(request: Request, db: Session = Depends(get_db)):
         return {"status": "ignored", "reason": "action not handled"}
 
     return {"status": "accepted"}
+
+
+@app.post("/api/reviews/{review_id}/publish")
+def publish_review(review_id: int, db: Session = Depends(get_db)):
+    review = db.query(Review).filter(Review.id == review_id).first()
+    if not review:
+        raise HTTPException(404, "Review not found")
+
+    approved_findings = db.query(Finding).filter(Finding.review_id == review.id, Finding.decision == "approved").all()
+
+    if not approved_findings:
+        return {"status": "skipped", "reason": "No approved findings to publish"}
+
+    # Format for GitHub
+    gh_comments = []
+    for f in approved_findings:
+        gh_comments.append(
+            {"path": f.file_path, "line": f.line, "body": f"**[CodeReviewBot]** ({f.category})\n\n{f.explanation}"}
+        )
+
+    client = GitHubClient(os.environ["GITHUB_TOKEN"])
+
+    # Note: Requires storing owner/repo somewhere (e.g. joining through PullRequest model)
+    # For demo, we hardcode or extract from the DB relationships.
+    pr = review.pull_request
+    repo = pr.repository
+    owner_name, repo_name = repo.full_name.split("/")
+
+    try:
+        client.create_review(owner_name, repo_name, pr.number, gh_comments)
+
+        # Mark as published
+        review.status = "PUBLISHED"  # type: ignore
+        db.commit()
+        return {"status": "published"}
+    except Exception as e:
+        raise HTTPException(500, f"GitHub API Error: {str(e)}")

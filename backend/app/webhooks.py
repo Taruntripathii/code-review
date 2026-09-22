@@ -6,7 +6,7 @@ import os
 
 from dotenv import load_dotenv
 
-load_dotenv(override=True)
+load_dotenv()  # real env vars (CI, compose, tests) win over .env
 
 WEBHOOK_SECRET = os.getenv("GITHUB_WEBHOOK_SECRET", "test_secret")
 
