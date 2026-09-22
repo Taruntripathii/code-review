@@ -1,6 +1,10 @@
+import os
+
 from langgraph.graph import END, StateGraph
 
 from backend.app.db import SessionLocal
+from backend.app.diff_parser import get_file_patches
+from backend.app.github_client import GitHubClient
 from backend.app.llm import build_default_llm, build_prompt, parse_llm_output
 from backend.app.models import Finding, Review
 from backend.app.schemas import DiffChunk, ReviewState
@@ -9,8 +13,11 @@ _llm = build_default_llm()
 
 
 def parse_diff(state: ReviewState) -> ReviewState:
-    # GitHubClient + diff_parser plug in here in the real pipeline.
-    state.raw_files = [{"filename": "app.py", "patch": "@@ -1,1 +1,1 @@\n+print('hi')"}]
+    # Unit tests invoke with no owner/repo — nothing to fetch, leave raw_files as-is.
+    if not state.owner or not state.repo:
+        return state
+    client = GitHubClient(os.getenv("GITHUB_TOKEN", ""))
+    state.raw_files = client.get_pr_files(state.owner, state.repo, state.pr_number)
     return state
 
 
@@ -21,13 +28,15 @@ def filter_files(state: ReviewState) -> ReviewState:
 
 
 def chunk_diff(state: ReviewState) -> ReviewState:
-    for f in state.raw_files:
-        state.chunks.append(
-            DiffChunk(
-                file_path=f["filename"],
-                added_lines=[{"new_line": 1, "content": "print('hi')"}],
-            )
-        )
+    for path, info in get_file_patches(state.raw_files).items():
+        if info["skipped"]:
+            continue
+        added_lines = [
+            {"new_line": line.new_line, "content": line.content} for line in info["lines"] if line.kind == "added"
+        ]
+        if not added_lines:
+            continue
+        state.chunks.append(DiffChunk(file_path=path, added_lines=added_lines))
     return state
 
 

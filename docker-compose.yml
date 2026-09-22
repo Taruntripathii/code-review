@@ -9,7 +9,9 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/code_review
+      - DATABASE_URL=postgresql+psycopg://postgres:postgres@db:5432/code_review
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_WEBHOOK_SECRET=${GITHUB_WEBHOOK_SECRET}
     volumes:
       - ./backend:/app/backend
     command: ["uv", "run", "uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
@@ -38,6 +40,18 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  dashboard:
+    build: .
+    command: uv run streamlit run dashboard/app.py --server.port 8501 --server.address 0.0.0.0
+    volumes:
+      - .:/app
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://api:8000
+    depends_on:
+      - api
 
 volumes:
   postgres_data:

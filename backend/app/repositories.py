@@ -1,6 +1,20 @@
 from sqlalchemy.orm import Session
 
-from backend.app.models import PullRequest, Review
+from backend.app.models import PullRequest, Repository, Review
+
+
+class RepositoryRepo:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_or_create(self, full_name: str) -> Repository:
+        repo = self.db.query(Repository).filter_by(full_name=full_name).first()
+        if not repo:
+            repo = Repository(full_name=full_name)
+            self.db.add(repo)
+            self.db.flush()
+            self.db.refresh(repo)
+        return repo
 
 
 class PullRequestRepo:

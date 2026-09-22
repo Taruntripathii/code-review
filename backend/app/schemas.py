@@ -17,6 +17,9 @@ class LLMFinding(BaseModel):
 class ReviewState(BaseModel):
     pull_request_id: int
     head_sha: str
+    owner: str = ""
+    repo: str = ""
+    pr_number: int = 0
     raw_files: list[dict] = []
     chunks: list["DiffChunk"] = []
     raw_findings: list["LLMFinding"] = []
