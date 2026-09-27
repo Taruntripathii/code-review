@@ -24,6 +24,7 @@ dependencies = [
     "shap>=0.49.1",
     "joblib>=1.6.0",
     "streamlit>=1.64.0",
+    "ngrok>=1.4.0",
 ]
 
 [tool.setuptools.packages.find]

@@ -89,6 +89,7 @@ async def github_webhook(request: Request, background_tasks: BackgroundTasks, db
     # (persist_review) writes the review in the background.
     repo_row = RepositoryRepo(db).get_or_create(repo_full_name)
     pr_row = PullRequestRepo(db).get_or_create(
+        # pyrefly: ignore [bad-argument-type]
         repository_id=int(repo_row.id),
         number=pr_number,
         head_sha=head_sha,
@@ -102,6 +103,7 @@ async def github_webhook(request: Request, background_tasks: BackgroundTasks, db
         owner=owner_name,
         repo=repo_name,
         pr_number=pr_number,
+        # pyrefly: ignore [bad-argument-type]
         pull_request_id=int(pr_row.id),
         head_sha=head_sha,
     )

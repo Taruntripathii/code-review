@@ -12,15 +12,19 @@ st.title("CodeReviewBot - Human Review Queue")
 def fetch_pending_reviews():
     # Assume we expose this endpoint in main.py
     try:
-        resp = httpx.get(f"{API_URL}/api/reviews?status=PENDING_HUMAN_REVIEW")
+        resp = httpx.get(f"{API_URL}/api/reviews?status=PENDING_HUMAN_REVIEW", timeout=10.0)
         return resp.json() if resp.status_code == 200 else []
-    except httpx.ConnectError:
-        return []
+    except httpx.RequestError:
+        # ConnectError (API down) or ReadTimeout (API up but DB hanging) — surface it
+        # instead of crashing the page, so the reviewer sees why the queue is empty.
+        return None
 
 
 reviews = fetch_pending_reviews()
 
-if not reviews:
+if reviews is None:
+    st.error(f"Couldn't reach the API at {API_URL}. Is it running, and is its database up?")
+elif not reviews:
     st.success("Inbox zero! No pending reviews.")
 else:
     for review in reviews:
