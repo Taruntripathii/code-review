@@ -17,28 +17,28 @@
 
 ## The Problem It Solves
 
-Code review is where good engineering happens — and where it quietly rots. Reviewers are busy, so pull requests sit for hours. When they do get looked at, attention is uneven: the first files get a careful read, the last ones get a rubber stamp. Style nits crowd out real bugs, and the same "you forgot to handle the error case" comment gets typed out for the thousandth time.
+Code review is where good engineering happens — and where it quietly rots. Reviewers are busy, so pull requests sit for hours. When they do get looked at, attention is uneven: the first files get a [...]
 
-Fully automated reviewers don't fix this — they make it worse. An LLM let loose on a diff hallucinates line numbers, invents issues to look useful, and posts a wall of low-signal comments directly to the author's PR. Nobody trusts a bot that cries wolf, so the comments get muted and the tool gets uninstalled.
+Fully automated reviewers don't fix this — they make it worse. An LLM let loose on a diff hallucinates line numbers, invents issues to look useful, and posts a wall of low-signal comments directly t[...]
 
-**CodeReviewBot splits the difference.** The machine does the tedious part — reading every added line of every file, every time — but it is never allowed to speak to the author on its own. Every finding lands in a human review queue first. A person approves, rejects, or edits, and *only approved findings* are published back to GitHub. You get the throughput of automation with the accountability of a human reviewer.
+**CodeReviewBot splits the difference.** The machine does the tedious part — reading every added line of every file, every time — but it is never allowed to speak to the author on its own. Every f[...]
 
 ## The Solution
 
-A PR opens on GitHub. A webhook fires. CodeReviewBot fetches the real diff, walks it through a deterministic pipeline that chunks the changes and asks an LLM to critique only the lines that actually changed, filters out weak or duplicate findings, and persists the survivors as *pending*. A reviewer opens a Streamlit dashboard, sees each finding with its confidence score, and decides. Hit **Publish**, and the approved comments are posted to the PR as a single GitHub review.
+A PR opens on GitHub. A webhook fires. CodeReviewBot fetches the real diff, walks it through a deterministic pipeline that chunks the changes and asks an LLM to critique only the lines that actually c[...]
 
-The LLM is swappable — point it at a local [Ollama](https://ollama.com/) model for zero-cost private reviews, or at any OpenAI-compatible endpoint. Nothing about the pipeline assumes a specific vendor.
+The LLM is swappable — point it at a local [Ollama](https://ollama.com/) model for zero-cost private reviews, or at any OpenAI-compatible endpoint. Nothing about the pipeline assumes a specific vend[...]
 
 ## Core Features
 
 | Feature | What it does |
 | --- | --- |
-| 🔐 **Verified webhooks** | Every delivery is checked against the GitHub `X-Hub-Signature-256` HMAC in constant time, and de-duplicated by delivery ID so a retried webhook never reviews the same push twice. |
-| 🧩 **Real-diff analysis** | Fetches the actual PR diff (paginated), parses unified-diff hunks back to real line numbers, and sends the LLM *only the added lines* — so every comment cites a line that genuinely changed. |
+| 🔐 **Verified webhooks** | Every delivery is checked against the GitHub `X-Hub-Signature-256` HMAC in constant time, and de-duplicated by delivery ID so a retried webhook never reviews the same pu[...] |
+| 🧩 **Real-diff analysis** | Fetches the actual PR diff (paginated), parses unified-diff hunks back to real line numbers, and sends the LLM *only the added lines* — so every comment cites a line [...] |
 | 🧠 **Vendor-agnostic LLM** | Runs against local Ollama or any OpenAI-compatible API. Malformed model output degrades to "no findings" instead of crashing the run. |
 | 🪶 **Noise control** | Findings with thin explanations or low confidence are dropped, and near-duplicate comments on the same region are collapsed before a human ever sees them. |
 | 👤 **Human-in-the-loop** | Nothing is posted automatically. A Streamlit queue lets a reviewer approve / reject / edit each finding; only approved ones publish. |
-| 📊 **ML risk scoring** | An optional XGBoost model scores each finding's likelihood of being actionable (with SHAP explainability), degrading gracefully to a neutral 0.5 when no model is trained. |
+| 📊 **ML risk scoring** | An optional XGBoost model scores each finding's likelihood of being actionable (with SHAP explainability), degrading gracefully to a neutral 0.5 when no model is trained. [...] |
 | 🐳 **One-command stack** | API, Postgres, and dashboard come up together via Docker Compose with a healthchecked database. |
 
 ## Architecture
@@ -66,7 +66,7 @@ flowchart TD
     M --> N[(PostgreSQL<br/>reviews + findings)]
     N --> O[Streamlit dashboard<br/>human review queue]
     O -->|approve / reject| N
-    O -->|Publish| Q[POST /api/reviews/&#123;id&#125;/publish]
+    O -->|Publish| Q["POST /api/reviews/publish"]
     Q -->|approved findings only| R[GitHub PR Review]
 ```
 
@@ -161,7 +161,7 @@ uv run mypy backend
 uv run pytest
 ```
 
-The suite mocks the LLM and GitHub at a single boundary so pipeline logic is tested deterministically, and uses an in-memory database for the API endpoints — no live LLM, database, or network is required to run it.
+The suite mocks the LLM and GitHub at a single boundary so pipeline logic is tested deterministically, and uses an in-memory database for the API endpoints — no live LLM, database, or network is req[...]
 
 ## Contributing
 
@@ -173,4 +173,3 @@ The suite mocks the LLM and GitHub at a single boundary so pipeline logic is tes
 ## License
 
 Released under the [MIT License](#-license). Add a `LICENSE` file to formalize it for your fork.
-
